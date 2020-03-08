@@ -1,0 +1,10 @@
+{
+  "maxRevs": 1800,
+  "minRevs": 800,
+  "stepSize": 25,
+  "minStep": 10,
+  "maxStep": 20,
+  "intervalMs": 1000,
+  "servoMinPWM": 100,
+  "servoMaxPWM": 750
+}

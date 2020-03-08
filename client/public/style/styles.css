@@ -1,0 +1,218 @@
+body {
+    min-width: 480px;
+    overflow: hidden;
+    height: calc(100vh - 16px);
+    margin: 8px;
+    background-color: cadetblue;
+    box-sizing: border-box;
+    padding-bottom: 16px;
+}
+
+button {
+    touch-action: manipulation;
+}
+
+.disable-dbl-tap-zoom {
+    touch-action: manipulation;
+}
+.applayout {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+.appTitleContainer {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    width: 100%;
+    height: 100px;
+    margin-bottom: 24px;
+}
+.appTitleText {
+    font-size: 60px;
+    margin: 16px;
+    height: 100%;
+}
+.settingsButton {
+    font-size: 68px;
+    line-height: 68px;
+    margin: 16px;
+    width: 68px;
+    height: 68px;
+}
+.normalModeContent {
+    display: flex;
+    flex-flow: row;
+    height: 100%;
+}
+
+.speedmeterContainer {
+    display: flex;
+    flex-flow: column;
+    flex: 1 0 20%;
+    height: 100%;
+}
+
+.buttonsContainer {
+    display: flex;
+    flex-flow: column;
+    margin: 0 16px;
+    flex: 1 1 80%;
+    justify-content: space-between;
+}
+
+.meterBar {
+    list-style-type: none;
+    margin: 0;
+    padding: 2px 2px 5px 5px;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    flex-direction: column-reverse;
+    width: 100%;
+    height: 100%;
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 0px;
+}
+.meterBlock {
+     background-color: lightgray;
+     width: 80%;
+     margin-top: 2px;
+     margin-bottom: 0;
+     padding: 0;
+     border-radius: 4px;
+}
+.toBeMovedBlock {
+    border: 2px solid black;
+}
+
+.greenBlock {
+    background-color: green;
+}
+
+.selectedBlock {
+    background-color: blue !important;
+}
+
+.onOffButton {
+    height: 10%;
+    font-size: 6vh;
+    background-color: darkred;
+    color: white;
+    border-radius: 50px;
+    border: 0;
+}
+.onOffButton[app-on] {
+    background-color: darkgreen;
+}
+
+.onOffButton:disabled {
+   background-color: gray;
+}
+
+.increaseButton {
+    height: 30%;
+    font-size: 20vh;
+    background-color: darksalmon;
+    outline: none;
+    border-radius: 50px;
+    border: 0;
+    color: white;
+}
+.increaseButton:active {
+    background-color: saddlebrown;
+}
+.increaseButton:disabled {
+    background-color: gray;
+}
+
+.decreaseButton {
+    margin-top: 16px;
+    height: 30%;
+    font-size: 20vh;
+    background: dodgerblue;
+    outline: none;
+    border-radius: 50px;
+    border: 0;
+    color: white;
+}
+.decreaseButton:active {
+    background-color: darkblue;
+}
+.decreaseButton:disabled {
+    background-color: gray;
+    user-select: none;
+}
+.customProgramLabel {
+    min-height: 50px;
+    max-height: 50px;
+    font-size: 50px;
+    line-height: 50px;
+}
+.startStopButton {
+    height: 10%;
+    font-size: 6vh;
+    border-radius: 50px;
+    border: 0;
+    background-color: darkred;
+    color: white;
+}
+
+.startStopButton[program-on] {
+    background-color: darkgreen;
+}
+
+.startStopButton:disabled {
+    background-color: gray;
+}
+
+.settingsModeContent {
+    display: flex;
+    flex-flow: column;
+    margin-left: 32px;
+    margin-right: 32px;
+}
+
+.settingsHeader {
+    font-size: 50px;
+    margin-top: 32px;
+}
+
+.settingsLabel {
+    font-size: 40px;
+    margin-top: 16px;
+    max-width: 96%;
+    display: flex;
+}
+
+.calibButtonContainer {
+    display: flex;
+    justify-content: space-around;
+}
+
+.calibButton {
+    height: 200px;
+    width: 48%;
+    line-height: 150px;
+    font-size: 50px;
+    margin-top: 32px;
+    border-radius: 50px;
+    border: 0;
+    outline: none;
+}
+.calibButton:active {
+    background-color: gray;
+}
+
+.settingsInput {
+    height: 80px;
+    line-height: 64px;
+    font-size: 64px;
+    padding: 0 16px;
+    display: flex;
+    width: 96%;
+    align-self: center;
+}

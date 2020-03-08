@@ -1,0 +1,17 @@
+{
+  "name": "garage-door-opener-client",
+  "version": "1.0.0",
+  "description": "Boat trolling speed control. Client.",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "private": true,
+  "main": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "0.19.2",
+    "jquery": "3.4.1"
+  },
+  "devDependencies": {}
+}
