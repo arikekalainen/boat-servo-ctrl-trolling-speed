@@ -1,0 +1,23 @@
+# Boat Trolling speed systemd Unit-file
+# /lib/systemd/system/boat.service
+# "installation"
+# - copy this file to /lib/systemd/system/boat.service
+# - $ sudo systemctl daemon-reload
+# - $ sudo systemctl enable boat.service
+# - $ sudo reboot
+# "logging"
+# - $ sudo tail /home/pi/boat.log
+# "start/stop/status" manually
+#  - sudo systemctl start clock.service
+
+[Unit]
+Description=Boat trolling speed controller
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/pi/BoatTrollingControl/backend
+ExecStart=/bin/bash -c '/usr/bin/node main.js > /home/pi/boat.log 2>&1'
+
+[Install]
+WantedBy=network.target

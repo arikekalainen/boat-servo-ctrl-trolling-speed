@@ -1,11 +1,12 @@
 {
-  "name": "garage-door-opener-client",
+  "name": "boat-trolling-speed-controller",
   "version": "1.0.0",
   "description": "Boat trolling speed control. Client.",
   "repository": {
     "type": "git",
     "url": ""
   },
+  "author": "ari.kekalainen@gmail.com",
   "private": true,
   "main": "",
   "license": "MIT",

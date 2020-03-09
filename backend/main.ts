@@ -15,9 +15,6 @@ const app = express();
 import routes from "./routes/index";
 import servoControl from './routes/servoControl';
 
-// Local module dependencies
-import appConfig = require("./lib/config");
-
 module boatTrollingControl {
     /**
      * ExpressJS app

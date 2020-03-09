@@ -19,6 +19,7 @@ module ServoControl {
         gpiomem: false,
         mapping: "physical"
     };
+
     // default config
     let config = {
         maxRevs: 2000, // MAX revs (rpm)
