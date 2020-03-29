@@ -6,7 +6,7 @@
 # - $ sudo systemctl enable boat.service
 # - $ sudo reboot
 # "logging"
-# - $ sudo tail /home/pi/boat.log
+# - $ sudo tail -F /home/pi/boat.log
 # "start/stop/status" manually
 #  - sudo systemctl start clock.service
 
