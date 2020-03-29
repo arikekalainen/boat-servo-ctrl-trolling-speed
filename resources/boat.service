@@ -16,7 +16,7 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/home/pi/BoatTrollingControl/backend
+WorkingDirectory=/home/pi/boat-servo-ctrl-trolling-speed/backend
 ExecStart=/bin/bash -c '/usr/bin/node main.js > /home/pi/boat.log 2>&1'
 
 [Install]
