@@ -53,6 +53,7 @@ module boatTrollingControl {
         // parameter handlinf
         app.post("/parameters/save", routes.noCache, servoControl.saveParams);
         app.get("/parameters/load", routes.noCache, servoControl.loadParams);
+        app.get("/parameters/reset", routes.noCache, servoControl.resetParams);
         // Send HTTP 404 for pages that have no defined route
         app.all("*", (req: express.Request, res: express.Response) => {
             res.status(404).send("Bad request");

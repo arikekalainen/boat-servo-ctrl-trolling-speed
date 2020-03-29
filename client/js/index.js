@@ -17,12 +17,14 @@ let direction; // 1 = up and -1 down
 // Configuration (Loaded from server)
 // - fill with defaults
 let config = {
-    maxRevs: 2000, // MAX revs (rpm)
-    minRevs: 800,  // MIN revs (rpm)
-    stepSize: 25,  // Revs step size (rpm)
-    minStep: 10,   // Custom program: min step number
-    maxStep: 20,   // Custom program: max step number
-    intervalMs: 1000 // Custom program: stepping interval
+    maxRevs: 2000,      // MAX revs (rpm)
+    minRevs: 800,       // MIN revs (rpm)
+    stepSize: 25,       // Revs step size (rpm)
+    minStep: 10,        // Custom program: min step number
+    maxStep: 20,        // Custom program: max step number
+    intervalMs: 1000,   // Custom program: stepping interval
+    servoMinPWM: 100,   // Servo setting: min PWM value
+    servoMaxPWM: 750    // Servo setting: max PWM value
 };
 
 let tempConfig = {...config};
@@ -41,56 +43,95 @@ const saveClicked = () => {
         console.log("Save parameters: DONE");
         config = {...tempConfig};
         currentStep = 0;
+        location.reload();
     });
 };
 
 const cancelClicked = () => {
-    console.log("cancelClicked");
-    $("#step-size-input").val(config.stepSize);
-    $("#min-revs-input").val(config.minRevs);
-    $("#max-revs-input").val(config.maxRevs);
-    $("#step-interval-input").val(config.intervalMs);
+    setConfigToSettings(config);
     tempConfig = {...config};
 };
 
+const resetClicked = () => {
+    return axios({
+        method: 'get',
+        url: 'parameters/reset',
+    })
+        .then((res) => {
+            console.log("reset parameters: get : ", res.data);
+            if (res.data && res.data.boat) {
+                config = {...res.data.boat};
+                setConfigToSettings(config);
+                tempConfig = {...res.data.boat};
+                currentStep = res.data.currentStep || 0;
+                console.log("Store parameters to globals : currentStep=", currentStep);
+            }
+            location.reload();
+            return Promise.resolve();
+        });
+};
+
 const calibIncrease = () => {
-    axios({
+    return axios({
         method: 'post',
         url: 'speed/increase',
         data: {
             stepSize: 10,
             calib: true
         }
-    })
+    }).then((res) => {
+        if (res && res.data && res.data.currentPWM) {
+            $("#current-pwm").text(res.data.currentPWM)
+        }
+        return Promise.resolve();
+    });
 };
 const calibDecrease = () => {
-    axios({
+    return axios({
         method: 'post',
         url: 'speed/decrease',
         data: {
             stepSize: 10,
             calib: true
         }
-    })
-
+    }).then((res) => {
+        if (res && res.data && res.data.currentPWM) {
+            $("#current-pwm").text(res.data.currentPWM)
+        }
+        return Promise.resolve();
+    });
 };
 const calibSetMin = () => {
-    axios({
+    return axios({
         method: 'post',
         url: 'calib/setmin',
         data: {
             minRevs: config.minRevs
         }
-    })
+    }).then((res) => {
+        if (res && res.data && res.data.currentPWM) {
+            $("#current-pwm").text(res.data.currentPWM);
+            $("#min-pwm-input").val(res.data.currentPWM);
+            config.servoMinPWM = res.data.currentPWM;
+        }
+        return Promise.resolve();
+    });
 };
 const calibSetMax = () => {
-    axios({
+    return axios({
         method: 'post',
         url: 'calib/setmax',
         data: {
             maxRevs: config.maxRevs
         }
-    })
+    }).then((res) => {
+        if (res && res.data && res.data.currentPWM) {
+            $("#current-pwm").text(res.data.currentPWM);
+            $("#max-pwm-input").val(res.data.currentPWM);
+            config.servoMaxPWM = res.data.currentPWM;
+        }
+        return Promise.resolve();
+    });
 };
 const customProgramStepTimeChanged = (value) => {
     const valueStr = value.toString();
@@ -120,6 +161,20 @@ const maxRevsValueChanged = (value) => {
     }
 };
 
+const minPwmValueChanged = (value) => {
+    const valueStr = value.toString();
+    if (valueStr && !isNaN(valueStr)) {
+        tempConfig.servoMinPWM = Number(valueStr);
+    }
+};
+
+const maxPwmValueChanged = (value) => {
+    const valueStr = value.toString();
+    if (valueStr && !isNaN(valueStr)) {
+        tempConfig.servoMaxPWM = Number(valueStr);
+    }
+};
+
 const onOffButtonClicked = () => {
     appOn = !appOn;
     if (appOn) {
@@ -139,7 +194,7 @@ const onOffButtonClicked = () => {
         $("#start-stop-program").prop( "disabled", true);
 
         // Set Revs to zero
-        axios({
+        return axios({
             method: 'post',
             url: 'speed/zero',
             data: {
@@ -148,6 +203,7 @@ const onOffButtonClicked = () => {
         }).then((res) => {
             currentStep = 0;
             fillMeterBar();
+            return Promise.resolve();
         })
 
     }
@@ -189,22 +245,31 @@ const startStopButtonClicked = () => {
     }
 };
 
+const setConfigToSettings = (config) => {
+    $("#step-size-input").val(config.stepSize);
+    $("#min-revs-input").val(config.minRevs);
+    $("#max-revs-input").val(config.maxRevs);
+    $("#step-interval-input").val(config.intervalMs);
+    $("#min-pwm-input").val(config.servoMinPWM);
+    $("#max-pwm-input").val(config.servoMaxPWM);
+};
+
 const settingsButtonClicked = () => {
     console.log("Settings button clicked");
     settingsView = !settingsView;
     if (settingsView) {
+        setConfigToSettings(config);
+
         $("#settings-mode-content")[0].style.display = "flex";
         $("#normal-mode-content")[0].style.display = "none";
+
     } else {
         $("#settings-mode-content")[0].style.display = "none";
         $("#normal-mode-content")[0].style.display = "flex";
 
         loadParameters()
             .then(() => {
-                $("#step-size-input").val(config.stepSize);
-                $("#min-revs-input").val(config.minRevs);
-                $("#max-revs-input").val(config.maxRevs);
-                $("#step-interval-input").val(config.intervalMs);
+                setConfigToSettings(config);
                 fillMeterBar();
             });
 
@@ -232,7 +297,11 @@ const increaseButtonClicked = () => {
                     stepSize: config.stepSize,
                     calib: false
                 }
-            })
+            }).then((res) => {
+                if (res && res.data && res.data.currentPWM) {
+                    $("#current-pwm").text(res.data.currentPWM)
+                }
+            });
         }
     }
 };
@@ -250,7 +319,11 @@ const decreaseButtonClicked = () => {
                         stepSize: config.stepSize,
                         calib: false
                     }
-                })
+                }).then((res) => {
+                    if (res && res.data && res.data.currentPWM) {
+                        $("#current-pwm").text(res.data.currentPWM)
+                    }
+                });
             }
             currentStep = currentStep - 1;
         }
@@ -352,10 +425,11 @@ const loadParameters = async () => {
             console.log("load parameters: get : ", res.data);
             if (res.data && res.data.boat) {
                 config = {...res.data.boat};
+                tempConfig = {...config}; // set also temp
                 currentStep = res.data.currentStep || 0;
                 console.log("Store parameters to globals : currentStep=", currentStep);
             }
-            return new Promise(resolve => resolve(true));
+            return Promise.resolve();
         });
 };
 
@@ -365,10 +439,7 @@ const loadParameters = async () => {
 setTimeout(() => {
     loadParameters()
         .then(() => {
-            $("#step-size-input").val(config.stepSize);
-            $("#min-revs-input").val(config.minRevs);
-            $("#max-revs-input").val(config.maxRevs);
-            $("#step-interval-input").val(config.intervalMs);
+            setConfigToSettings(config);
             fillMeterBar();
         });
 
@@ -376,4 +447,5 @@ setTimeout(() => {
     $("#increase-button").prop("disabled", true);
     $("#decrease-button").prop("disabled", true);
     $("#start-stop-program").prop("disabled", true);
+    // document.body.requestFullscreen();
 },100);

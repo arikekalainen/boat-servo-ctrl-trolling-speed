@@ -13,7 +13,7 @@ import * as rpio from "rpio";
 module ServoControl {
 
     "use strict";
-    const GPIO_18 = 12;
+    const SERVOPIN = 12;
 
     const options: RPIO.Options = {
         gpiomem: false,
@@ -21,44 +21,37 @@ module ServoControl {
     };
 
     // default config
-    let config = {
-        maxRevs: 2000, // MAX revs (rpm)
-        minRevs: 800,  // MIN revs (rpm)
-        stepSize: 25,  // Revs step size (rpm)
-        minStep: 10,   // Custom program: min step number
-        maxStep: 20,   // Custom program: max step number
-        intervalMs: 1000, // Custom program: stepping interval
-        servoMinPWM: 100, // Servo Min PWN
-        servoMaxPWM: 750 // Servo Max PWN
-    };
+    let config = {...JSON.parse(fs.readFileSync("defaultParams.json", "utf-8"))};
     // Starting point (PWN) for servo, always start from min
     let currentPWM = config.servoMinPWM;
     // current step for frontend (e.g. if page is reloaded, current step should not be reset)
     let currentStep = 0;
 
     // Calculated conversion factor for converting revs step (rpm) to PWM
-    let revsStepToPWMstep = Number(((config.servoMaxPWM - config.servoMinPWM) /
-                                (config.maxRevs - config.minRevs)).toFixed(4));
+    const calcRevsStepToPwmStep = (config) => {
+        return Math.max(2, Number(((config.servoMaxPWM - config.servoMinPWM) /
+            (config.maxRevs - config.minRevs)).toFixed(4)));
+    };
+    let revsStepToPWMstep = calcRevsStepToPwmStep(config);
 
     /**
      * Initialise ServoControl
      */
     export const init = () => {
         config = {...JSON.parse(fs.readFileSync("params.json", "utf-8"))};
-        revsStepToPWMstep = Number(((config.servoMaxPWM - config.servoMinPWM) /
-                    (config.maxRevs - config.minRevs)).toFixed(4));
+        revsStepToPWMstep = calcRevsStepToPwmStep(config);
         console.log("Current config", config);
 
         console.log("revsStepToPWMstep : ", revsStepToPWMstep);
         console.log("rev step = " + config.stepSize  + " pwm step = ", Math.round(revsStepToPWMstep * config.stepSize));
 
         rpio.init(options);
-        rpio.open(GPIO_18, rpio.PWM);
+        rpio.open(SERVOPIN, rpio.PWM);
         rpio.pwmSetClockDivider(64);
-        rpio.pwmSetRange(GPIO_18, 1024);
+        rpio.pwmSetRange(SERVOPIN, 1024);
 
         // Start from min PWM and step 0
-        rpio.pwmSetData(12, currentPWM);
+        rpio.pwmSetData(SERVOPIN, currentPWM);
         currentStep = 0;
     };
 
@@ -81,10 +74,10 @@ module ServoControl {
                 currentStep = 0;
             }
             console.log("servo PWM :", currentPWM);
-            rpio.pwmSetData(12, currentPWM);
-            res.send("OK").status(200);
+            rpio.pwmSetData(SERVOPIN, currentPWM);
+            res.status(200).send({currentPWM: currentPWM});
         } else {
-            res.send("Failed").status(500);
+            res.status(500).end();
         }
     };
     /**
@@ -95,8 +88,10 @@ module ServoControl {
     export const zeroSpeed = (req: express.Request, res: express.Response) => {
         currentStep = 0;
         currentPWM = config.servoMinPWM;
-        rpio.pwmSetData(12, config.servoMinPWM);
-        res.send("OK").status(200);
+        rpio.pwmSetData(SERVOPIN, config.servoMinPWM);
+        if (res) {
+            res.status(200).send({currentPWM: currentPWM});
+        }
     };
     /**
      * increaseSpeed
@@ -118,10 +113,10 @@ module ServoControl {
                 currentStep = Math.ceil((config.maxRevs - config.minRevs) / config.stepSize) + 1;
             }
             console.log("servo PWM :", currentPWM);
-            rpio.pwmSetData(12, currentPWM);
-            res.send("OK").status(200);
+            rpio.pwmSetData(SERVOPIN, currentPWM);
+            res.status(200).send({currentPWM: currentPWM});
         } else {
-            res.send("Failed").status(500);
+            res.status(500).end();
         }
     };
 
@@ -130,33 +125,34 @@ module ServoControl {
         if (req.body.minRevs && req.body.minRevs < config.maxRevs) {
             config.minRevs = req.body.minRevs;
             config.servoMinPWM = currentPWM;
-            revsStepToPWMstep = Number(((config.servoMaxPWM - config.servoMinPWM) /
-                (config.maxRevs - config.minRevs)).toFixed(4));
+            revsStepToPWMstep = calcRevsStepToPwmStep(config);
             _saveParams();
-            res.send("OK").status(200);
+            res.status(200).send({currentPWM: currentPWM});
         } else {
-            res.send("Failed").status(500);
+            res.status(500).end();
         }
     };
+
     export const calibSetMax = (req: express.Request, res: express.Response) => {
         console.log("calibSetMax : ", req.body.maxRevs);
         if (req.body.maxRevs && req.body.maxRevs > config.minRevs) {
             config.maxRevs = req.body.maxRevs;
             config.servoMaxPWM = currentPWM;
-            revsStepToPWMstep = Number(((config.servoMaxPWM - config.servoMinPWM) /
-                (config.maxRevs - config.minRevs)).toFixed(4));
+            revsStepToPWMstep = calcRevsStepToPwmStep(config);
+            res.status(200).send({currentPWM: currentPWM});
+
             _saveParams();
-            res.send("OK").status(200);
         } else {
-            res.send("Failed").status(500);
+            res.status(500).end();
         }
     };
 
     const _saveParams = () => {
         fs.writeFileSync("params.json", JSON.stringify(config, null, 2), {encoding: "utf-8"});
         // reset step and pwn
-        currentStep = 0;
-        rpio.pwmSetData(12, config.servoMinPWM);
+        zeroSpeed(null, null);
+
+        console.log("config : ", JSON.stringify(config, null, 2));
     };
 
     export const saveParams = (req: express.Request, res: express.Response) => {
@@ -165,9 +161,9 @@ module ServoControl {
             const tempConfig = {...config, ...JSON.parse(JSON.stringify(req.body.config, null, 2))};
             config = {...tempConfig};
             _saveParams();
-            res.send("OK").status(200);
+            res.status(200).end();
         } catch (e) {
-            res.send("Failed").status(500);
+            res.status(500).end();
         }
     };
     export const loadParams = (req: express.Request, res: express.Response) => {
@@ -175,9 +171,20 @@ module ServoControl {
         try {
             const params = JSON.parse(fs.readFileSync("params.json", "utf-8"));
             config = {...params};
-            res.send({boat: params, currentStep: currentStep}).status(200);
+            res.status(200).send({boat: params, currentStep: currentStep});
         } catch (e) {
-            res.send("Failed").status(500);
+            res.status(500).end();
+        }
+    };
+    export const resetParams = (req: express.Request, res: express.Response) => {
+        try {
+            const params = JSON.parse(fs.readFileSync("defaultParams.json", "utf-8"));
+            config = {...params};
+            _saveParams();
+            zeroSpeed(null, null);
+            res.status(200).send({boat: params, currentStep: currentStep});
+        } catch (e) {
+            res.status(500).end();
         }
     };
 }

@@ -18,7 +18,7 @@ button {
 .applayout {
     display: flex;
     flex-flow: column;
-    height: 100%;
+    height: calc(100vh - 200px);
 }
 .appTitleContainer {
     display: flex;
@@ -34,11 +34,16 @@ button {
     height: 100%;
 }
 .settingsButton {
-    font-size: 68px;
-    line-height: 68px;
+    font-size: 40px;
+    line-height: 80px;
     margin: 16px;
-    width: 68px;
-    height: 68px;
+    width: 80px;
+    height: 80px;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    padding-bottom: 10px;
 }
 .normalModeContent {
     display: flex;
@@ -178,33 +183,30 @@ button {
 
 .settingsHeader {
     font-size: 50px;
-    margin-top: 32px;
 }
 
 .settingsLabel {
     font-size: 40px;
-    margin-top: 16px;
-    max-width: 96%;
+    min-width: 300px;
+    margin-right: 32px;
     display: flex;
 }
 
 .calibButtonContainer {
     display: flex;
     justify-content: space-around;
+    margin-bottom: 32px;
 }
 
 .calibButton {
     height: 200px;
-    width: 48%;
+    width: 30%;
     line-height: 150px;
-    font-size: 50px;
-    margin-top: 32px;
+    font-size: 40px;
+    margin-top: 16px;
     border-radius: 50px;
     border: 0;
     outline: none;
-}
-.calibButton:active {
-    background-color: gray;
 }
 
 .settingsInput {
@@ -215,4 +217,25 @@ button {
     display: flex;
     width: 96%;
     align-self: center;
+}
+
+.input-container {
+    display: flex;
+    flex-flow: row;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.calibSettingsHeader {
+
+    margin-top: 32px;
+    margin-bottom: 16px;
+}
+.calibSettingsHeaderText {
+    font-size: 50px;
+}
+
+.calibSettingsHeaderPwm {
+    font-size: 50px;
+    margin-left: 32px;
 }
